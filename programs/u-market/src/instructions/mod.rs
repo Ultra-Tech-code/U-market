@@ -14,6 +14,10 @@ pub mod accept_offer_sol;
 pub mod accept_offer_spl;
 pub mod confirm_delivery;
 pub mod update_user_type;
+pub mod resolve_product_dispute_sol;
+pub mod resolve_product_dispute_spl;
+pub mod resolve_offer_dispute_sol;
+pub mod resolve_offer_dispute_spl;
 
 pub use initialize::*;
 pub use update_platform_config::*;
@@ -31,3 +35,7 @@ pub use accept_offer_sol::*;
 pub use accept_offer_spl::*;
 pub use confirm_delivery::*;
 pub use update_user_type::*;
+pub use resolve_product_dispute_sol::*;
+pub use resolve_product_dispute_spl::*;
+pub use resolve_offer_dispute_sol::*;
+pub use resolve_offer_dispute_spl::*;

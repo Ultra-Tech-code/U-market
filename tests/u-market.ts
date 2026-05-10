@@ -3,12 +3,12 @@ import { Program } from "@coral-xyz/anchor";
 import { PublicKey, Keypair, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { createMint, getOrCreateAssociatedTokenAccount, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { assert } from "chai";
-import { UMarket } from "../target/types/u_market";
+import { Umarket } from "../target/types/umarket";
 
 describe("u-market", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const provider = anchor.getProvider() as anchor.AnchorProvider;
-  const program = anchor.workspace.Umarket as Program<UMarket>;
+  const program = anchor.workspace.Umarket as Program<Umarket>;
   const authority = (provider.wallet as anchor.Wallet).payer;
 
   const feeRecipient = Keypair.generate();
@@ -16,7 +16,7 @@ describe("u-market", () => {
   const seller = Keypair.generate();
   const buyer2 = Keypair.generate();
 
-  let usedyMint: PublicKey;
+  let umarketMint: PublicKey;
   let splPaymentMint: PublicKey;
   let platformConfigPda: PublicKey;
   let sellerProfilePda: PublicKey;
@@ -44,8 +44,8 @@ describe("u-market", () => {
     buyerProfilePda = findPda([Buffer.from("profile"), buyer.publicKey.toBuffer()]);
     buyer2ProfilePda = findPda([Buffer.from("profile"), buyer2.publicKey.toBuffer()]);
 
-    // Create mints — usedyMint authority = platformConfigPda
-    usedyMint = await createMint(provider.connection, buyer, platformConfigPda, null, 9);
+    // Create mints — umarketMint authority = platformConfigPda
+    umarketMint = await createMint(provider.connection, buyer, platformConfigPda, null, 9);
     splPaymentMint = await createMint(provider.connection, buyer, provider.wallet.publicKey, null, 6);
   });
 
@@ -59,7 +59,7 @@ describe("u-market", () => {
       .accounts({
         platformConfig: platformConfigPda,
         feeRecipient: feeRecipient.publicKey,
-        usedyMint,
+        umarketMint,
         splPaymentMint,
         authority: authority.publicKey,
         systemProgram: SystemProgram.programId,
@@ -74,7 +74,7 @@ describe("u-market", () => {
     assert.equal(cfg.userCount.toNumber(), 0);
     assert.ok(cfg.authority.equals(authority.publicKey));
     assert.ok(cfg.feeRecipient.equals(feeRecipient.publicKey));
-    assert.ok(cfg.usedyMint.equals(usedyMint));
+    assert.ok(cfg.umarketMint.equals(umarketMint));
     assert.ok(cfg.splPaymentMint.equals(splPaymentMint));
   });
 
@@ -160,7 +160,7 @@ describe("u-market", () => {
 
   it("Updates platform config (fee)", async () => {
     await program.methods
-      .updatePlatformConfig(10, null)
+      .updatePlatformConfig(10, null, null)
       .accounts({
         platformConfig: platformConfigPda,
         authority: authority.publicKey,
@@ -174,7 +174,7 @@ describe("u-market", () => {
   it("Updates platform config (fee recipient)", async () => {
     const newRecipient = Keypair.generate();
     await program.methods
-      .updatePlatformConfig(5, newRecipient.publicKey)
+      .updatePlatformConfig(5, newRecipient.publicKey, null)
       .accounts({
         platformConfig: platformConfigPda,
         authority: authority.publicKey,
@@ -187,7 +187,7 @@ describe("u-market", () => {
 
     // Reset back to original feeRecipient for later tests
     await program.methods
-      .updatePlatformConfig(5, feeRecipient.publicKey)
+      .updatePlatformConfig(5, feeRecipient.publicKey, null)
       .accounts({
         platformConfig: platformConfigPda,
         authority: authority.publicKey,
@@ -227,8 +227,8 @@ describe("u-market", () => {
     const productId = new anchor.BN(1);
     productPda = findPda([Buffer.from("product"), u64Le(1)]);
 
-    const sellerUsedyAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection, seller, usedyMint, seller.publicKey
+    const sellerUmarketAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection, seller, umarketMint, seller.publicKey
     );
 
     const price = new anchor.BN(2 * LAMPORTS_PER_SOL);
@@ -243,8 +243,8 @@ describe("u-market", () => {
         product: productPda,
         platformConfig: platformConfigPda,
         sellerProfile: sellerProfilePda,
-        usedyMint,
-        sellerUsedyAta: sellerUsedyAta.address,
+        umarketMint,
+        sellerUmarketAta: sellerUmarketAta.address,
         seller: seller.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -322,8 +322,8 @@ describe("u-market", () => {
   });
 
   it("Approves payment (SOL) — releases escrow to seller", async () => {
-    const buyerUsedyAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection, buyer, usedyMint, buyer.publicKey
+    const buyerUmarketAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection, buyer, umarketMint, buyer.publicKey
     );
 
     const sellerBalBefore = await provider.connection.getBalance(seller.publicKey);
@@ -337,8 +337,8 @@ describe("u-market", () => {
         platformConfig: platformConfigPda,
         seller: seller.publicKey,
         feeRecipient: feeRecipient.publicKey,
-        usedyMint,
-        buyerUsedyAta: buyerUsedyAta.address,
+        umarketMint,
+        buyerUmarketAta: buyerUmarketAta.address,
         buyer: buyer.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -468,8 +468,8 @@ describe("u-market", () => {
     const offerEscrowPda = findPda([
       Buffer.from("offer_escrow"), u64Le(1), buyer.publicKey.toBuffer(),
     ]);
-    const buyerUsedyAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection, buyer, usedyMint, buyer.publicKey
+    const buyerUmarketAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection, buyer, umarketMint, buyer.publicKey
     );
 
     const sellerBalBefore = await provider.connection.getBalance(seller.publicKey);
@@ -483,8 +483,8 @@ describe("u-market", () => {
         platformConfig: platformConfigPda,
         seller: seller.publicKey,
         feeRecipient: feeRecipient.publicKey,
-        usedyMint,
-        buyerUsedyAta: buyerUsedyAta.address,
+        umarketMint,
+        buyerUmarketAta: buyerUmarketAta.address,
         buyer: buyer.publicKey,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: SystemProgram.programId,
@@ -540,7 +540,7 @@ describe("u-market", () => {
   it("Rejects unauthorized platform config update", async () => {
     try {
       await program.methods
-        .updatePlatformConfig(50, null)
+        .updatePlatformConfig(50, null, null)
         .accounts({
           platformConfig: platformConfigPda,
           authority: buyer.publicKey,
@@ -556,7 +556,7 @@ describe("u-market", () => {
   it("Rejects fee >= 100", async () => {
     try {
       await program.methods
-        .updatePlatformConfig(100, null)
+        .updatePlatformConfig(100, null, null)
         .accounts({
           platformConfig: platformConfigPda,
           authority: authority.publicKey,
@@ -571,8 +571,8 @@ describe("u-market", () => {
   it("Rejects buyer trying to list a product", async () => {
     const nextId = (await program.account.platformConfig.fetch(platformConfigPda)).productCount.toNumber() + 1;
     const pda = findPda([Buffer.from("product"), u64Le(nextId)]);
-    const buyerUsedyAta = await getOrCreateAssociatedTokenAccount(
-      provider.connection, buyer, usedyMint, buyer.publicKey
+    const buyerUmarketAta = await getOrCreateAssociatedTokenAccount(
+      provider.connection, buyer, umarketMint, buyer.publicKey
     );
 
     try {
@@ -582,8 +582,8 @@ describe("u-market", () => {
           product: pda,
           platformConfig: platformConfigPda,
           sellerProfile: buyerProfilePda, // buyer profile
-          usedyMint,
-          sellerUsedyAta: buyerUsedyAta.address,
+          umarketMint,
+          sellerUmarketAta: buyerUmarketAta.address,
           seller: buyer.publicKey,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
@@ -681,6 +681,120 @@ describe("u-market", () => {
     } catch (e) {
       // seed derivation will fail since buyer key != seller key
       assert.ok(e);
+    }
+  });
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 8. Dispute Resolution Tests
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  it("Tests dispute resolution (Product SOL)", async () => {
+    // 1. Set dispute buffer to 0 for testing
+    await program.methods
+      .updatePlatformConfig(5, null, new anchor.BN(0))
+      .accounts({
+        platformConfig: platformConfigPda,
+        authority: authority.publicKey,
+      })
+      .rpc();
+
+    // 2. Buy product to create escrow
+    const productId = new anchor.BN(1);
+    const productPda = findPda([Buffer.from("product"), u64Le(1)]);
+    const escrowPda = findPda([
+      Buffer.from("escrow"), u64Le(1), buyer2.publicKey.toBuffer(),
+    ]);
+
+    await program.methods
+      .buyProductSol(new anchor.BN(1))
+      .accounts({
+        product: productPda,
+        escrow: escrowPda,
+        buyerProfile: buyer2ProfilePda,
+        platformConfig: platformConfigPda,
+        buyer: buyer2.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([buyer2])
+      .rpc();
+
+    // 3. Admin resolves dispute - refund to buyer
+    const buyer2BalBefore = await provider.connection.getBalance(buyer2.publicKey);
+
+    await program.methods
+      .resolveProductDisputeSol(false) // false = refund buyer
+      .accounts({
+        escrow: escrowPda,
+        product: productPda,
+        sellerProfile: sellerProfilePda,
+        platformConfig: platformConfigPda,
+        authority: authority.publicKey,
+        seller: seller.publicKey,
+        buyer: buyer2.publicKey,
+        feeRecipient: feeRecipient.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .rpc();
+
+    const buyer2BalAfter = await provider.connection.getBalance(buyer2.publicKey);
+    assert.isAbove(buyer2BalAfter, buyer2BalBefore, "Buyer should have been refunded");
+
+    // 4. Verify escrow closed
+    try {
+      await program.account.escrow.fetch(escrowPda);
+      assert.fail("Escrow should be closed");
+    } catch (e) {
+      assert.include(e.message, "Account does not exist");
+    }
+  });
+
+  it("Tests dispute resolution time lock", async () => {
+    // 1. Set dispute buffer to 1 hour
+    await program.methods
+      .updatePlatformConfig(5, null, new anchor.BN(3600))
+      .accounts({
+        platformConfig: platformConfigPda,
+        authority: authority.publicKey,
+      })
+      .rpc();
+
+    // 2. Create new escrow
+    const escrowPda = findPda([
+      Buffer.from("escrow"), u64Le(1), buyer2.publicKey.toBuffer(),
+    ]);
+
+    await program.methods
+      .buyProductSol(new anchor.BN(1))
+      .accounts({
+        product: findPda([Buffer.from("product"), u64Le(1)]),
+        escrow: escrowPda,
+        buyerProfile: buyer2ProfilePda,
+        platformConfig: platformConfigPda,
+        buyer: buyer2.publicKey,
+        systemProgram: SystemProgram.programId,
+      })
+      .signers([buyer2])
+      .rpc();
+
+    // 3. Try to resolve dispute immediately (should fail)
+    try {
+      await program.methods
+        .resolveProductDisputeSol(true)
+        .accounts({
+          escrow: escrowPda,
+          product: findPda([Buffer.from("product"), u64Le(1)]),
+          sellerProfile: sellerProfilePda,
+          platformConfig: platformConfigPda,
+          authority: authority.publicKey,
+          seller: seller.publicKey,
+          buyer: buyer2.publicKey,
+          feeRecipient: feeRecipient.publicKey,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+      assert.fail("Should have failed due to time lock");
+    } catch (e) {
+      assert.include(e.message, "DisputeBufferNotPassed");
     }
   });
 });

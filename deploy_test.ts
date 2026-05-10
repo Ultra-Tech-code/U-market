@@ -6,7 +6,7 @@ import * as fs from "fs";
 
 
 // Make sure to match the Program ID from your local/devnet build
-const PROGRAM_ID = new PublicKey("82wC4Yky79wYGoEhKfYcCCcZiTQaCBLxPqAU8tKKrDkF");
+const PROGRAM_ID = new PublicKey("FXYLuJuZYnFFEk7rpTyy1W8RKMMxcACnxe1vJVivH1u");
 
 // Helper: u64 to LE buffer
 const u64Le = (n: number) => new anchor.BN(n).toArrayLike(Buffer, "le", 8);
@@ -46,7 +46,7 @@ async function main() {
     const [sellerProfilePda] = PublicKey.findProgramAddressSync([Buffer.from("profile"), authority.publicKey.toBuffer()], PROGRAM_ID);
 
     // Mints
-    let usedyMint: PublicKey;
+    let umarketMint: PublicKey;
     let splPaymentMint: PublicKey;
 
     // Check if initialized
@@ -56,7 +56,7 @@ async function main() {
         configAccount = await program.account.platformConfig.fetch(platformConfigPda);
         isInitialized = true;
         console.log("Platform already initialized.");
-        usedyMint = configAccount.usedyMint;
+        umarketMint = configAccount.umarketMint;
         splPaymentMint = configAccount.splPaymentMint;
     } catch (e) {
         console.log("Platform not initialized yet. Initializing...");
@@ -64,7 +64,7 @@ async function main() {
 
     if (!isInitialized) {
         console.log("Creating mints...");
-        usedyMint = await createMint(connection, authority, platformConfigPda, null, 9);
+        umarketMint = await createMint(connection, authority, platformConfigPda, null, 9);
         splPaymentMint = await createMint(connection, authority, authority.publicKey, null, 6);
 
         console.log("Initializing platform config...");
@@ -73,7 +73,7 @@ async function main() {
             .accounts({
                 platformConfig: platformConfigPda,
                 feeRecipient: feeRecipient,
-                usedyMint: usedyMint,
+                umarketMint: umarketMint,
                 splPaymentMint: splPaymentMint,
                 authority: authority.publicKey,
                 systemProgram: SystemProgram.programId,
@@ -114,11 +114,11 @@ async function main() {
         PROGRAM_ID
     );
 
-    console.log("Creating Associated Token Account for USEDY rewards...");
-    const sellerUsedyAta = await getOrCreateAssociatedTokenAccount(
+    console.log("Creating Associated Token Account for UMARKET rewards...");
+    const sellerUmarketAta = await getOrCreateAssociatedTokenAccount(
         connection,
         authority,
-        usedyMint,
+        umarketMint,
         authority.publicKey
     );
 
@@ -135,8 +135,8 @@ async function main() {
             product: productPda,
             platformConfig: platformConfigPda,
             sellerProfile: sellerProfilePda,
-            usedyMint: usedyMint,
-            sellerUsedyAta: sellerUsedyAta.address,
+            umarketMint: umarketMint,
+            sellerUmarketAta: sellerUmarketAta.address,
             seller: authority.publicKey,
             tokenProgram: TOKEN_PROGRAM_ID,
             systemProgram: SystemProgram.programId,

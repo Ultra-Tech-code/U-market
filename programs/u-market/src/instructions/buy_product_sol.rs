@@ -36,6 +36,7 @@ pub fn handler(ctx: Context<BuyProductSol>, amount_kg: u64) -> Result<()> {
     escrow.amount = total_amount;
     escrow.amount_kg = amount_kg;
     escrow.payment_mode = PaymentMode::Sol;
+    escrow.created_at = Clock::get()?.unix_timestamp;
     escrow.bump = ctx.bumps.escrow;
 
     emit!(ProductBought {

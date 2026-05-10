@@ -37,7 +37,7 @@
 │  │  → OfferEscrow → confirm_delivery                          │ │
 │  └─────────────────────────────────┘                           │
 │                                                                 │
-│  Reward: 1 USEDY token minted on list_product, approve_payment │
+│  Reward: 1 UMARKET token minted on list_product, approve_payment │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -54,7 +54,7 @@
 | `authority`        | `Pubkey`  | Admin wallet (upgrade authority)         |
 | `feeRecipient`     | `Pubkey`  | Wallet that receives platform fees       |
 | `feePercentage`    | `u8`      | Platform fee 0–99%                       |
-| `usedyMint`        | `Pubkey`  | USEDY reward token mint                  |
+| `umarketMint`     | `Pubkey`  | UMARKET reward token mint               |
 | `splPaymentMint`   | `Pubkey`  | Accepted SPL payment mint (e.g. USDC)    |
 | `productCount`     | `u64`     | Auto-incrementing product counter        |
 | `requestCount`     | `u64`     | Auto-incrementing request counter        |
@@ -199,7 +199,7 @@ interface NegotiationTier {
 |-------------------|-----------|--------------------------------|
 | `platformConfig`  | PDA init  | `["platform_config"]`          |
 | `feeRecipient`    | Unchecked | Fee destination wallet         |
-| `usedyMint`       | Unchecked | USEDY reward mint              |
+| `umarketMint`    | Unchecked | UMARKET reward mint           |
 | `splPaymentMint`  | Unchecked | Accepted SPL mint (e.g. USDC)  |
 | `authority`       | Signer    | Admin wallet                   |
 | `systemProgram`   | Program   | System Program                 |
@@ -244,7 +244,7 @@ interface NegotiationTier {
 ### 5. `listProduct`
 
 **Who:** Sellers (or Both)  
-**Reward:** 1 USEDY token minted to seller
+**Reward:** 1 UMARKET token minted to seller
 
 | Arg                 | Type                   | Description              |
 |---------------------|------------------------|--------------------------|
@@ -291,7 +291,7 @@ Transfers SPL tokens into escrow token vault.
 ### 9. `approvePaymentSol`
 
 **Who:** Buyer (confirms receipt)  
-Releases SOL from escrow to seller (minus fee). Closes escrow. Mints 1 USEDY to buyer.
+Releases SOL from escrow to seller (minus fee). Closes escrow. Mints 1 UMARKET to buyer.
 
 ---
 
@@ -352,7 +352,7 @@ Locks `price × quantity` SPL into offer escrow vault.
 ### 15. `confirmDelivery`
 
 **Who:** Buyer who accepted  
-Releases offer escrow funds to seller (minus fee). Marks offer as delivered. Mints 1 USEDY to buyer.
+Releases offer escrow funds to seller (minus fee). Marks offer as delivered. Mints 1 UMARKET to buyer.
 
 ---
 
@@ -375,7 +375,7 @@ Buyer:  createProfile(Buyer)  → buyProductSol(5kg) → approvePaymentSol()
 ```
 Seller lists product → Buyer purchases (SOL locked in escrow)
 → Buyer confirms receipt → Escrow released to seller (fee deducted)
-→ Both receive USEDY rewards
+→ Both receive UMARKET rewards
 ```
 
 ### Flow B: Direct Purchase (SPL / USDC)
@@ -616,7 +616,7 @@ function calculatePrice(product: any, quantityKg: number): number {
 2. **Request Card** — Show name, max price, quantity, deadline countdown, payment mode, status badge
 3. **Offer Card** — Show seller info, price vs. request max, quantity, deadline, accept button
 4. **Escrow Status Bar** — Visual progress: `Purchased → In Transit → Delivered → Payment Released`
-5. **Profile Stats** — Recycled count, total weight, total payout, USEDY balance
+5. **Profile Stats** — Recycled count, total weight, total payout, UMARKET balance
 6. **Negotiation Tier Table** — Editable table for sellers to set quantity/discount tiers
 
 ### State Management Tips
@@ -680,3 +680,6 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 - [ ] Add request/offer system
 - [ ] Add admin dashboard (if needed)
 - [ ] Subscribe to program events for real-time updates
+
+
+wallet = "~/.config/solana/phantom_keypair.json"

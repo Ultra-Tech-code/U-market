@@ -62,8 +62,8 @@ pub fn handler(ctx: Context<ApprovePaymentSpl>) -> Result<()> {
     let mint_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         MintTo {
-            mint: ctx.accounts.usedy_mint.to_account_info(),
-            to: ctx.accounts.buyer_usedy_ata.to_account_info(),
+            mint: ctx.accounts.umarket_mint.to_account_info(),
+            to: ctx.accounts.buyer_umarket_ata.to_account_info(),
             authority: ctx.accounts.platform_config.to_account_info(),
         },
         config_seeds,
@@ -145,13 +145,13 @@ pub struct ApprovePaymentSpl<'info> {
     )]
     pub fee_recipient_token_account: Box<Account<'info, TokenAccount>>,
 
-    /// CHECK: USEDY mint
+    /// CHECK: UMARKET mint
     #[account(mut)]
-    pub usedy_mint: UncheckedAccount<'info>,
+    pub umarket_mint: UncheckedAccount<'info>,
 
-    /// CHECK: buyer's USEDY ATA
+    /// CHECK: buyer's UMARKET ATA
     #[account(mut)]
-    pub buyer_usedy_ata: UncheckedAccount<'info>,
+    pub buyer_umarket_ata: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub buyer: Signer<'info>,

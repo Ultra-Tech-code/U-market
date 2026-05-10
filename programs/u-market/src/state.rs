@@ -36,12 +36,13 @@ pub struct PlatformConfig {
     pub authority: Pubkey,          // admin / upgrade authority
     pub fee_recipient: Pubkey,      // where platform fees are sent
     pub fee_percentage: u8,         // 0-99
-    pub usedy_mint: Pubkey,         // reward token mint
+    pub umarket_mint: Pubkey,         // reward token mint
     pub spl_payment_mint: Pubkey,   // accepted SPL payment token (e.g. USDC)
     pub product_count: u64,
     pub request_count: u64,
     pub offer_count: u64,
     pub user_count: u64,
+    pub dispute_buffer: i64,        // in seconds
     pub bump: u8,
 }
 
@@ -51,12 +52,13 @@ impl PlatformConfig {
         + 32  // authority
         + 32  // fee_recipient
         + 1   // fee_percentage
-        + 32  // usedy_mint
+        + 32  // umarket_mint
         + 32  // spl_payment_mint
         + 8   // product_count
         + 8   // request_count
         + 8   // offer_count
         + 8   // user_count
+        + 8   // dispute_buffer
         + 1;  // bump
 }
 
@@ -179,6 +181,7 @@ pub struct Escrow {
     pub amount: u64,           // locked amount (lamports or SPL base units)
     pub amount_kg: u64,
     pub payment_mode: PaymentMode,
+    pub created_at: i64,
     pub bump: u8,
 }
 
@@ -189,6 +192,7 @@ impl Escrow {
         + 8   // amount
         + 8   // amount_kg
         + 1   // payment_mode
+        + 8   // created_at
         + 1;  // bump
 }
 
@@ -275,6 +279,7 @@ pub struct OfferEscrow {
     pub offer_id: u64,
     pub amount: u64,
     pub payment_mode: PaymentMode,
+    pub created_at: i64,
     pub bump: u8,
 }
 
@@ -284,5 +289,6 @@ impl OfferEscrow {
         + 8   // offer_id
         + 8   // amount
         + 1   // payment_mode
+        + 8   // created_at
         + 1;  // bump
 }

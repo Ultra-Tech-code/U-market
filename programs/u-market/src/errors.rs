@@ -82,4 +82,7 @@ pub enum UmarketError {
 
     #[msg("No escrow payment found")]
     NoPaymentFound,
+
+    #[msg("Dispute buffer has not passed yet")]
+    DisputeBufferNotPassed,
 }

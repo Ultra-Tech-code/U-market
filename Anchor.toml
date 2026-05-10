@@ -7,10 +7,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-u_market = "82wC4Yky79wYGoEhKfYcCCcZiTQaCBLxPqAU8tKKrDkF"
+u_market = "FXYLuJuZYnFFEk7rpTyy1W8RKMMxcACnxe1vJVivH1u"
 
 [programs.devnet]
-u_market = "82wC4Yky79wYGoEhKfYcCCcZiTQaCBLxPqAU8tKKrDkF"
+u_market = "FXYLuJuZYnFFEk7rpTyy1W8RKMMxcACnxe1vJVivH1u"
 
 [registry]
 url = "https://api.apr.dev"

@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Token, TokenAccount, Transfer, MintTo};
 use anchor_spl::token::Mint;
 
-declare_id!("82wC4Yky79wYGoEhKfYcCCcZiTQaCBLxPqAU8tKKrDkF");
+declare_id!("FXYLuJuZYnFFEk7rpTyy1W8RKMMxcACnxe1vJVivH1u");
 
 pub mod errors;
 pub mod state;
@@ -28,8 +28,9 @@ pub mod umarket {
         ctx: Context<UpdatePlatformConfig>,
         fee_percentage: u8,
         new_fee_recipient: Option<Pubkey>,
+        new_dispute_buffer: Option<i64>,
     ) -> Result<()> {
-        instructions::update_platform_config::handler(ctx, fee_percentage, new_fee_recipient)
+        instructions::update_platform_config::handler(ctx, fee_percentage, new_fee_recipient, new_dispute_buffer)
     }
 
     // ── Profile ───────────────────────────────────────────────────────────────
@@ -158,6 +159,34 @@ pub mod umarket {
         new_type: UserType,
     ) -> Result<()> {
         instructions::update_user_type::handler(ctx, new_type)
+    }
+
+    pub fn resolve_product_dispute_sol(
+        ctx: Context<ResolveProductDisputeSol>,
+        to_seller: bool,
+    ) -> Result<()> {
+        instructions::resolve_product_dispute_sol::handler(ctx, to_seller)
+    }
+
+    pub fn resolve_product_dispute_spl(
+        ctx: Context<ResolveProductDisputeSpl>,
+        to_seller: bool,
+    ) -> Result<()> {
+        instructions::resolve_product_dispute_spl::handler(ctx, to_seller)
+    }
+
+    pub fn resolve_offer_dispute_sol(
+        ctx: Context<ResolveOfferDisputeSol>,
+        to_seller: bool,
+    ) -> Result<()> {
+        instructions::resolve_offer_dispute_sol::handler(ctx, to_seller)
+    }
+
+    pub fn resolve_offer_dispute_spl(
+        ctx: Context<ResolveOfferDisputeSpl>,
+        to_seller: bool,
+    ) -> Result<()> {
+        instructions::resolve_offer_dispute_spl::handler(ctx, to_seller)
     }
 }
 

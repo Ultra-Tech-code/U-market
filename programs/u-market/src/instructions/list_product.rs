@@ -51,13 +51,13 @@ pub fn handler(
     product.negotiation_tiers = negotiation_tiers;
     product.bump = ctx.bumps.product;
 
-    // Mint 1 USEDY reward token for listing
+    // Mint 1 UMARKET reward token for listing
     let seeds: &[&[&[u8]]] = &[&[b"platform_config", &[config.bump]]];
     let cpi_ctx = CpiContext::new_with_signer(
         ctx.accounts.token_program.to_account_info(),
         MintTo {
-            mint: ctx.accounts.usedy_mint.to_account_info(),
-            to: ctx.accounts.seller_usedy_ata.to_account_info(),
+            mint: ctx.accounts.umarket_mint.to_account_info(),
+            to: ctx.accounts.seller_umarket_ata.to_account_info(),
             authority: ctx.accounts.platform_config.to_account_info(),
         },
         seeds,
@@ -99,13 +99,13 @@ pub struct ListProduct<'info> {
     )]
     pub seller_profile: Account<'info, UserProfile>,
 
-    /// CHECK: USEDY reward mint - authority is platform_config PDA
+    /// CHECK: UMARKET reward mint - authority is platform_config PDA
     #[account(mut)]
-    pub usedy_mint: UncheckedAccount<'info>,
+    pub umarket_mint: UncheckedAccount<'info>,
 
-    /// CHECK: seller's associated token account for USEDY
+    /// CHECK: seller's associated token account for UMARKET
     #[account(mut)]
-    pub seller_usedy_ata: UncheckedAccount<'info>,
+    pub seller_umarket_ata: UncheckedAccount<'info>,
 
     #[account(mut)]
     pub seller: Signer<'info>,

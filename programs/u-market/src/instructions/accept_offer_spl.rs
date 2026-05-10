@@ -38,6 +38,7 @@ pub fn handler(ctx: Context<AcceptOfferSpl>) -> Result<()> {
     escrow.offer_id = offer.offer_id;
     escrow.amount = total_amount;
     escrow.payment_mode = PaymentMode::Spl;
+    escrow.created_at = Clock::get()?.unix_timestamp;
     escrow.bump = ctx.bumps.offer_escrow;
 
     emit!(OfferAccepted {
